@@ -1,5 +1,6 @@
 package com.julienphalip.idea.peekaboo;
 
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.ui.popup.Balloon;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.wm.WindowManager;
@@ -11,12 +12,15 @@ import com.maddyhome.idea.vim.command.MappingMode;
 import com.maddyhome.idea.vim.command.OperatorArguments;
 import com.maddyhome.idea.vim.extension.ExtensionHandler;
 import com.maddyhome.idea.vim.extension.VimExtension;
+import com.maddyhome.idea.vim.extension.VimExtensionFacade;
 import com.maddyhome.idea.vim.register.Register;
 import java.awt.*;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Optional;
 import javax.swing.*;
+import org.jetbrains.annotations.NotNull;
 
 public class Peekaboo implements VimExtension {
 
@@ -32,7 +36,7 @@ public class Peekaboo implements VimExtension {
                         EnumSet.of(MappingMode.NORMAL),
                         Arrays.asList(KeyStroke.getKeyStroke('\"')),
                         getOwner(),
-                        new ShowRegistersHandler(),
+                        new ShowRegistersHandler(KeyStroke.getKeyStroke('\"')),
                         false);
 
         VimPlugin.getKey()
@@ -40,16 +44,42 @@ public class Peekaboo implements VimExtension {
                         EnumSet.of(MappingMode.INSERT),
                         Arrays.asList(KeyStroke.getKeyStroke("control R")),
                         getOwner(),
-                        new ShowRegistersHandler(),
+                        new ShowRegistersHandler(KeyStroke.getKeyStroke("control R")),
                         false);
     }
 
     private static class ShowRegistersHandler implements ExtensionHandler {
+        private final KeyStroke originalKey;
+
+        public ShowRegistersHandler(KeyStroke keysToFeed) {
+            this.originalKey = keysToFeed;
+        }
+
         @Override
         public void execute(
-                VimEditor vimEditor,
-                ExecutionContext context,
-                OperatorArguments operatorArguments) {
+                @NotNull VimEditor vimEditor,
+                @NotNull ExecutionContext context,
+                @NotNull OperatorArguments operatorArguments) {
+            // Show the popup first
+            showPopup();
+
+            // Get the current editor
+            Editor editor =
+                    com.intellij
+                            .openapi
+                            .fileEditor
+                            .FileEditorManager
+                            .getInstance(
+                                    com.intellij.openapi.project.ProjectManager.getInstance()
+                                            .getOpenProjects()[0])
+                            .getSelectedTextEditor();
+
+            // Re-execute the original key
+            VimExtensionFacade.executeNormalWithoutMapping(
+                    Collections.singletonList(originalKey), editor);
+        }
+
+        private void showPopup() {
             StringBuilder html =
                     new StringBuilder(
                             """
@@ -144,11 +174,10 @@ public class Peekaboo implements VimExtension {
 
             html.append("</div></body></html>");
 
-            String finalHtml = html.toString();
-            Balloon balloon =
+            Balloon popup =
                     JBPopupFactory.getInstance()
                             .createHtmlTextBalloonBuilder(
-                                    finalHtml, null, new Color(43, 43, 43), null)
+                                    html.toString(), null, new Color(43, 43, 43), null)
                             .setAnimationCycle(10)
                             .setHideOnClickOutside(true)
                             .setHideOnKeyOutside(true)
@@ -158,7 +187,7 @@ public class Peekaboo implements VimExtension {
             if (ideFrame != null) {
                 Point location = new Point(0, ideFrame.getHeight() - 100);
                 RelativePoint point = new RelativePoint(ideFrame, location);
-                balloon.show(point, Balloon.Position.above);
+                popup.show(point, Balloon.Position.above);
             }
         }
 
