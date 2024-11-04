@@ -1,0 +1,14 @@
+<idea-plugin>
+    <id>com.julienphalip.ideavim-peekaboo</id>
+
+    <name>JVM Default Options</name>
+
+    <vendor email="jphalip@gmail.com">Julien Phalip</vendor>
+
+    <depends>IdeaVIM</depends>
+
+    <extensions defaultExtensionNs="IdeaVIM">
+        <vimExtension implementation="com.julienphalip.idea.peekaboo.Peekaboo"/>
+    </extensions>
+
+</idea-plugin>
