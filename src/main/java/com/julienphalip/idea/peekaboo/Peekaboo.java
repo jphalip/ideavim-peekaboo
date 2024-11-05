@@ -13,13 +13,16 @@ import com.maddyhome.idea.vim.command.OperatorArguments;
 import com.maddyhome.idea.vim.extension.ExtensionHandler;
 import com.maddyhome.idea.vim.extension.VimExtension;
 import com.maddyhome.idea.vim.extension.VimExtensionFacade;
+import com.maddyhome.idea.vim.key.KeyMapping;
+import com.maddyhome.idea.vim.key.MappingInfo;
 import com.maddyhome.idea.vim.register.Register;
 import java.awt.*;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 import javax.swing.*;
+import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 
 public class Peekaboo implements VimExtension {
@@ -31,28 +34,60 @@ public class Peekaboo implements VimExtension {
 
     @Override
     public void init() {
-        VimPlugin.getKey()
-                .putKeyMapping(
-                        EnumSet.of(MappingMode.NORMAL),
-                        Arrays.asList(KeyStroke.getKeyStroke('\"')),
-                        getOwner(),
-                        new ShowRegistersHandler(KeyStroke.getKeyStroke('\"')),
-                        false);
-
-        VimPlugin.getKey()
-                .putKeyMapping(
-                        EnumSet.of(MappingMode.INSERT),
-                        Arrays.asList(KeyStroke.getKeyStroke("control R")),
-                        getOwner(),
-                        new ShowRegistersHandler(KeyStroke.getKeyStroke("control R")),
-                        false);
+        // Register mapping for quote character in normal mode
+        List<KeyStroke> quoteKeyStroke = Collections.singletonList(KeyStroke.getKeyStroke('"'));
+        KeyMapping normalModeKeyMapping = VimPlugin.getKey().getKeyMapping(MappingMode.NORMAL);
+        List<Pair<List<KeyStroke>, MappingInfo>> quoteMappings =
+                normalModeKeyMapping.getMapTo(quoteKeyStroke);
+        for (Pair<List<KeyStroke>, MappingInfo> mapping : quoteMappings) {
+            VimPlugin.getKey()
+                    .putKeyMapping(
+                            EnumSet.of(MappingMode.NORMAL),
+                            mapping.getSecond().getFromKeys(),
+                            getOwner(),
+                            new ShowRegistersHandler(quoteKeyStroke),
+                            false);
+        }
+        if (normalModeKeyMapping.get(quoteKeyStroke) == null) {
+            VimPlugin.getKey()
+                    .putKeyMapping(
+                            EnumSet.of(MappingMode.NORMAL),
+                            quoteKeyStroke,
+                            getOwner(),
+                            new ShowRegistersHandler(quoteKeyStroke),
+                            false);
+        }
+        // Register mapping for control-r in insert mode
+        List<KeyStroke> controlRKeyStroke =
+                Collections.singletonList(KeyStroke.getKeyStroke("control R"));
+        KeyMapping insertModeKeyMapping = VimPlugin.getKey().getKeyMapping(MappingMode.INSERT);
+        List<Pair<List<KeyStroke>, MappingInfo>> controlRMappings =
+                insertModeKeyMapping.getMapTo(controlRKeyStroke);
+        for (Pair<List<KeyStroke>, MappingInfo> mapping : controlRMappings) {
+            VimPlugin.getKey()
+                    .putKeyMapping(
+                            EnumSet.of(MappingMode.INSERT),
+                            mapping.getSecond().getFromKeys(),
+                            getOwner(),
+                            new ShowRegistersHandler(controlRKeyStroke),
+                            false);
+        }
+        if (insertModeKeyMapping.get(controlRKeyStroke) == null) {
+            VimPlugin.getKey()
+                    .putKeyMapping(
+                            EnumSet.of(MappingMode.INSERT),
+                            controlRKeyStroke,
+                            getOwner(),
+                            new ShowRegistersHandler(controlRKeyStroke),
+                            false);
+        }
     }
 
     private static class ShowRegistersHandler implements ExtensionHandler {
-        private final KeyStroke originalKey;
+        private final List<KeyStroke> originalKeyStrokes;
 
-        public ShowRegistersHandler(KeyStroke keysToFeed) {
-            this.originalKey = keysToFeed;
+        public ShowRegistersHandler(List<KeyStroke> originalKeyStrokes) {
+            this.originalKeyStrokes = originalKeyStrokes;
         }
 
         @Override
@@ -60,10 +95,6 @@ public class Peekaboo implements VimExtension {
                 @NotNull VimEditor vimEditor,
                 @NotNull ExecutionContext context,
                 @NotNull OperatorArguments operatorArguments) {
-            // Show the popup first
-            showPopup();
-
-            // Get the current editor
             Editor editor =
                     com.intellij
                             .openapi
@@ -73,10 +104,12 @@ public class Peekaboo implements VimExtension {
                                     com.intellij.openapi.project.ProjectManager.getInstance()
                                             .getOpenProjects()[0])
                             .getSelectedTextEditor();
-
-            // Re-execute the original key
-            VimExtensionFacade.executeNormalWithoutMapping(
-                    Collections.singletonList(originalKey), editor);
+            if (editor != null) {
+                // Re-execute the original key
+                VimExtensionFacade.executeNormalWithoutMapping(originalKeyStrokes, editor);
+                // Show the popup
+                showPopup();
+            }
         }
 
         private void showPopup() {
