@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>com.julienphalip.ideavim-peekaboo</id>
+    <id></id>
 
     <name>IdeaVim Peekaboo</name>
 
@@ -8,7 +8,7 @@
     <depends>IdeaVIM</depends>
 
     <extensions defaultExtensionNs="IdeaVIM">
-        <vimExtension implementation="com.julienphalip.idea.peekaboo.Peekaboo"/>
+        <vimExtension implementation="com.julienphalip.ideavim.peekaboo.Peekaboo"/>
     </extensions>
 
 </idea-plugin>

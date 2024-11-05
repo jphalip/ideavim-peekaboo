@@ -44,6 +44,8 @@ dependencies {
 
 intellijPlatform {
     pluginConfiguration {
+        id = providers.gradleProperty("pluginId")
+        name = providers.gradleProperty("pluginName")
         version = providers.gradleProperty("pluginVersion")
         description = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
             val start = "<!-- Plugin description -->"

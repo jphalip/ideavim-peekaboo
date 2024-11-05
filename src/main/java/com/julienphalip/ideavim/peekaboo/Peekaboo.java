@@ -1,4 +1,4 @@
-package com.julienphalip.idea.peekaboo;
+package com.julienphalip.ideavim.peekaboo;
 
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.ui.popup.Balloon;
