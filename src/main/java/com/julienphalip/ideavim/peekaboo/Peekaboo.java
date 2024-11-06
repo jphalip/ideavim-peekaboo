@@ -4,6 +4,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.ui.popup.Balloon;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.wm.WindowManager;
+import com.intellij.ui.Gray;
 import com.intellij.ui.awt.RelativePoint;
 import com.maddyhome.idea.vim.VimPlugin;
 import com.maddyhome.idea.vim.api.ExecutionContext;
@@ -27,8 +28,14 @@ import org.jetbrains.annotations.NotNull;
 
 public class Peekaboo implements VimExtension {
 
+    private static final String REGISTER_COLOR = "#FFFFFF";
+    private static final String BG_COLOR = "#2b2b2b";
+    private static final String TEXT_COLOR = "#A9B7C6";
+    private static final String HEADER_COLOR = "#FFC66D";
+    private static final String COMMENT_COLOR = "#808080";
+
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return "peekaboo";
     }
 
@@ -83,12 +90,8 @@ public class Peekaboo implements VimExtension {
         }
     }
 
-    private static class ShowRegistersHandler implements ExtensionHandler {
-        private final List<KeyStroke> originalKeyStrokes;
-
-        public ShowRegistersHandler(List<KeyStroke> originalKeyStrokes) {
-            this.originalKeyStrokes = originalKeyStrokes;
-        }
+    private record ShowRegistersHandler(List<KeyStroke> originalKeyStrokes)
+            implements ExtensionHandler {
 
         @Override
         public void execute(
@@ -115,11 +118,13 @@ public class Peekaboo implements VimExtension {
         private void showPopup() {
             StringBuilder html =
                     new StringBuilder(
-                            """
+                            String.format(
+                                    """
 <html>
-<body style='margin: 3px; width: 100%; background-color: #2b2b2b; color: #A9B7C6;'>
+<body style='margin: 3px; width: 100%%; background-color: %s; color: %s;'>
 <div style='font-family: monospace; min-width: 600px;'>
-""");
+""",
+                                    BG_COLOR, TEXT_COLOR));
 
             java.util.Map<String, String> registerDescriptions = new java.util.HashMap<>();
             registerDescriptions.put(
@@ -136,7 +141,10 @@ public class Peekaboo implements VimExtension {
 
             // Add special registers first
             html.append("<div style='margin-bottom: 15px;'>");
-            html.append("<div style='margin-bottom: 8px; color: #FFC66D;'>Special Registers</div>");
+            html.append(
+                    String.format(
+                            "<div style='margin-bottom: 8px; color: %s;'>Special Registers</div>",
+                            HEADER_COLOR));
             String[] specialRegisters = {"\"", "*", "+", "%", "#", ".", ":", "/", "=", "-"};
             for (String reg : specialRegisters) {
                 Optional<Register> register =
@@ -153,7 +161,10 @@ public class Peekaboo implements VimExtension {
 
             // Add named registers (a-z)
             html.append("<div style='margin-bottom: 15px;'>");
-            html.append("<div style='margin-bottom: 8px; color: #FFC66D;'>Named Registers</div>");
+            html.append(
+                    String.format(
+                            "<div style='margin-bottom: 8px; color: %s;'>Named Registers</div>",
+                            HEADER_COLOR));
             for (char c = 'a'; c <= 'z'; c++) {
                 Optional<Register> register =
                         Optional.ofNullable(VimPlugin.getRegister().getRegister(c));
@@ -170,7 +181,10 @@ public class Peekaboo implements VimExtension {
 
             // Add Last Yank (register 0)
             html.append("<div style='margin-bottom: 15px;'>");
-            html.append("<div style='margin-bottom: 8px; color: #FFC66D;'>Last Yank</div>");
+            html.append(
+                    String.format(
+                            "<div style='margin-bottom: 8px; color: %s;'>Last Yank</div>",
+                            HEADER_COLOR));
             Optional<Register> register0 =
                     Optional.ofNullable(VimPlugin.getRegister().getRegister('0'));
             register0.ifPresent(
@@ -185,9 +199,11 @@ public class Peekaboo implements VimExtension {
             // Add numbered registers (1-9) - Delete/Change history
             html.append("<div style='margin-bottom: 15px;'>");
             html.append(
-                    "<div style='margin-bottom: 8px; color: #FFC66D;'>Delete/Change History <span"
-                            + " style='color: #808080;'>(deleted/changed content larger than one"
-                            + " line)</span></div>");
+                    String.format(
+                            "<div style='margin-bottom: 8px; color: %s;'>Delete/Change History"
+                                    + " <span style='margin-left: 8px; color: %s;'>(deleted/changed"
+                                    + " content larger than one line)</span></div>",
+                            HEADER_COLOR, COMMENT_COLOR));
             for (int i = 1; i <= 9; i++) {
                 Optional<Register> register =
                         Optional.ofNullable(
@@ -209,10 +225,9 @@ public class Peekaboo implements VimExtension {
 
             html.append("</div></body></html>");
 
-            Balloon popup =
+            Balloon ballon =
                     JBPopupFactory.getInstance()
-                            .createHtmlTextBalloonBuilder(
-                                    html.toString(), null, new Color(43, 43, 43), null)
+                            .createHtmlTextBalloonBuilder(html.toString(), null, Gray._43, null)
                             .setAnimationCycle(10)
                             .setHideOnClickOutside(true)
                             .setHideOnKeyOutside(true)
@@ -222,7 +237,7 @@ public class Peekaboo implements VimExtension {
             if (ideFrame != null) {
                 Point location = new Point(0, ideFrame.getHeight() - 100);
                 RelativePoint point = new RelativePoint(ideFrame, location);
-                popup.show(point, Balloon.Position.above);
+                ballon.show(point, Balloon.Position.above);
             }
         }
 
@@ -232,19 +247,22 @@ public class Peekaboo implements VimExtension {
                     String.format(
                             """
                             <div style='display: flex; margin-bottom: 4px; align-items: baseline;'>
-                                <span style='color: #FFFFFF; font-weight: bold;'>%s</span>
-                                <span style='color: #808080;'> → </span>
-                                <span style='color: #A9B7C6;'>%s</span>
+                                <span style='color: %s; font-weight: bold;'>%s</span>
+                                <span style='color: %s;'> → </span>
+                                <span style='color: %s;'>%s</span>
                                 %s
                             </div>
                             """,
+                            REGISTER_COLOR,
                             register,
+                            COMMENT_COLOR,
+                            TEXT_COLOR,
                             formatRegisterContent(content),
                             description != null
                                     ? String.format(
-                                            "<span style='color: #808080; margin-left:"
+                                            "<span style='color: %s; margin-left:"
                                                     + " 8px;'>(%s)</span>",
-                                            description)
+                                            COMMENT_COLOR, description)
                                     : ""));
         }
 
