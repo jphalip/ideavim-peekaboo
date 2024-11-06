@@ -123,7 +123,7 @@ public class Peekaboo implements VimExtension {
 
             java.util.Map<String, String> registerDescriptions = new java.util.HashMap<>();
             registerDescriptions.put(
-                    "\"", "unnamed register, last deleted, changed, or yanked content");
+                    "\"", "unnamed register: last deleted, changed, or yanked content");
             registerDescriptions.put("-", "deleted or changed content smaller than one line");
             registerDescriptions.put(":", "last executed command");
             registerDescriptions.put(".", "last inserted text");
@@ -185,7 +185,9 @@ public class Peekaboo implements VimExtension {
             // Add numbered registers (1-9) - Delete/Change history
             html.append("<div style='margin-bottom: 15px;'>");
             html.append(
-                    "<div style='margin-bottom: 8px; color: #FFC66D;'>Delete/Change History</div>");
+                    "<div style='margin-bottom: 8px; color: #FFC66D;'>Delete/Change History <span"
+                            + " style='color: #808080;'>(deleted/changed content larger than one"
+                            + " line)</span></div>");
             for (int i = 1; i <= 9; i++) {
                 Optional<Register> register =
                         Optional.ofNullable(

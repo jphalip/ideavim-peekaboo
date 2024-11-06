@@ -4,9 +4,9 @@
 An IdeaVim extension that shows register contents in a popup window when
 pressing `"` in normal mode or `Ctrl-R` in insert mode.
 
-![Screenshot showing register contents](screenshot.png)
-
 This extension is inspired from the [vim-peekaboo](https://github.com/junegunn/vim-peekaboo) plugin.
+
+![Screenshot showing register contents](images/screenshot.png)
 
 ## Features
 
