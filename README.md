@@ -28,7 +28,7 @@ This extension is inspired from the [vim-peekaboo](https://github.com/junegunn/v
       for "IdeaVim-Peekaboo"
     - Or download
       from [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/YOUR_PLUGIN_ID)
-3. Add `set peekaboo` in your `~/.ideavimrc` file
+3. Add `set peekaboo` to your `~/.ideavimrc` file, then run `:source ~/.ideavimrc` or restart the IDE.
 
 ## Usage
 
