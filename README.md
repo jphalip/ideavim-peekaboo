@@ -1,5 +1,5 @@
 <!-- Plugin description -->
-# IdeaVim-Peekaboo
+# Peekaboo (IdeaVim extension)
 
 An IdeaVim extension that shows register contents in a popup window when
 pressing `"` in normal mode or `Ctrl-R` in insert mode.
@@ -25,7 +25,7 @@ This extension is inspired from the [vim-peekaboo](https://github.com/junegunn/v
    haven't already
 2. Install this plugin:
     - In IntelliJ IDEA: Settings/Preferences → Plugins → Marketplace → Search
-      for "IdeaVim-Peekaboo"
+      for "Vim-Peekaboo"
     - Or download
       from [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/YOUR_PLUGIN_ID)
 3. Add `set peekaboo` to your `~/.ideavimrc` file, then run `:source ~/.ideavimrc` or restart the IDE.
