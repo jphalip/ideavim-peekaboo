@@ -1,11 +1,12 @@
 package com.julienphalip.ideavim.peekaboo;
 
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.ui.popup.Balloon;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
+import com.intellij.openapi.wm.IdeFrame;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.Gray;
 import com.intellij.ui.awt.RelativePoint;
+import com.maddyhome.idea.vim.KeyHandler;
 import com.maddyhome.idea.vim.VimPlugin;
 import com.maddyhome.idea.vim.api.ExecutionContext;
 import com.maddyhome.idea.vim.api.VimEditor;
@@ -13,7 +14,6 @@ import com.maddyhome.idea.vim.command.MappingMode;
 import com.maddyhome.idea.vim.command.OperatorArguments;
 import com.maddyhome.idea.vim.extension.ExtensionHandler;
 import com.maddyhome.idea.vim.extension.VimExtension;
-import com.maddyhome.idea.vim.extension.VimExtensionFacade;
 import com.maddyhome.idea.vim.key.KeyMapping;
 import com.maddyhome.idea.vim.key.MappingInfo;
 import com.maddyhome.idea.vim.register.Register;
@@ -98,21 +98,18 @@ public class Peekaboo implements VimExtension {
                 @NotNull VimEditor vimEditor,
                 @NotNull ExecutionContext context,
                 @NotNull OperatorArguments operatorArguments) {
-            Editor editor =
-                    com.intellij
-                            .openapi
-                            .fileEditor
-                            .FileEditorManager
-                            .getInstance(
-                                    com.intellij.openapi.project.ProjectManager.getInstance()
-                                            .getOpenProjects()[0])
-                            .getSelectedTextEditor();
-            if (editor != null) {
-                // Re-execute the original key
-                VimExtensionFacade.executeNormalWithoutMapping(originalKeyStrokes, editor);
-                // Show the popup
-                showPopup();
+            // Re-execute the original key
+            KeyHandler keyHandler = KeyHandler.getInstance();
+            for (KeyStroke keyStroke : originalKeyStrokes) {
+                keyHandler.handleKey(
+                        vimEditor,
+                        keyStroke,
+                        context,
+                        false,
+                        false,
+                        keyHandler.getKeyHandlerState());
             }
+            showPopup();
         }
 
         private void showPopup() {
@@ -225,7 +222,7 @@ public class Peekaboo implements VimExtension {
 
             html.append("</div></body></html>");
 
-            Balloon ballon =
+            Balloon balloon =
                     JBPopupFactory.getInstance()
                             .createHtmlTextBalloonBuilder(html.toString(), null, Gray._43, null)
                             .setAnimationCycle(10)
@@ -233,11 +230,12 @@ public class Peekaboo implements VimExtension {
                             .setHideOnKeyOutside(true)
                             .createBalloon();
 
-            JFrame ideFrame = WindowManager.getInstance().findVisibleFrame();
-            if (ideFrame != null) {
-                Point location = new Point(0, ideFrame.getHeight() - 100);
-                RelativePoint point = new RelativePoint(ideFrame, location);
-                ballon.show(point, Balloon.Position.above);
+            Window mostRecentFocusedWindow =
+                    WindowManager.getInstance().getMostRecentFocusedWindow();
+            if (mostRecentFocusedWindow instanceof IdeFrame activeFrame) {
+                Point location = new Point(0, activeFrame.getComponent().getHeight() - 100);
+                RelativePoint point = new RelativePoint(activeFrame.getComponent(), location);
+                balloon.show(point, Balloon.Position.above);
             }
         }
 

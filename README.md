@@ -27,7 +27,7 @@ This extension is inspired from the [vim-peekaboo](https://github.com/junegunn/v
     - In IntelliJ IDEA: Settings/Preferences → Plugins → Marketplace → Search
       for "Vim-Peekaboo"
     - Or download
-      from [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/YOUR_PLUGIN_ID)
+      from [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/25776-vim-peekaboo)
 3. Add `set peekaboo` to your `~/.ideavimrc` file, then run `:source ~/.ideavimrc` or restart the IDE.
 
 ## Usage
