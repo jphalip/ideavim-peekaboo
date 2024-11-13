@@ -44,17 +44,6 @@ public class Peekaboo implements VimExtension {
         // Register mapping for quote character in normal mode
         List<KeyStroke> quoteKeyStroke = Collections.singletonList(KeyStroke.getKeyStroke('"'));
         KeyMapping normalModeKeyMapping = VimPlugin.getKey().getKeyMapping(MappingMode.NORMAL);
-        List<Pair<List<KeyStroke>, MappingInfo>> quoteMappings =
-                normalModeKeyMapping.getMapTo(quoteKeyStroke);
-        for (Pair<List<KeyStroke>, MappingInfo> mapping : quoteMappings) {
-            VimPlugin.getKey()
-                    .putKeyMapping(
-                            EnumSet.of(MappingMode.NORMAL),
-                            mapping.getSecond().getFromKeys(),
-                            getOwner(),
-                            new ShowRegistersHandler(quoteKeyStroke),
-                            false);
-        }
         if (normalModeKeyMapping.get(quoteKeyStroke) == null) {
             VimPlugin.getKey()
                     .putKeyMapping(
@@ -68,17 +57,6 @@ public class Peekaboo implements VimExtension {
         List<KeyStroke> controlRKeyStroke =
                 Collections.singletonList(KeyStroke.getKeyStroke("control R"));
         KeyMapping insertModeKeyMapping = VimPlugin.getKey().getKeyMapping(MappingMode.INSERT);
-        List<Pair<List<KeyStroke>, MappingInfo>> controlRMappings =
-                insertModeKeyMapping.getMapTo(controlRKeyStroke);
-        for (Pair<List<KeyStroke>, MappingInfo> mapping : controlRMappings) {
-            VimPlugin.getKey()
-                    .putKeyMapping(
-                            EnumSet.of(MappingMode.INSERT),
-                            mapping.getSecond().getFromKeys(),
-                            getOwner(),
-                            new ShowRegistersHandler(controlRKeyStroke),
-                            false);
-        }
         if (insertModeKeyMapping.get(controlRKeyStroke) == null) {
             VimPlugin.getKey()
                     .putKeyMapping(
