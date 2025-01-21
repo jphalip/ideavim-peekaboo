@@ -1,4 +1,6 @@
-## [Next]
+## 1.0.3
+
+Fixed compatibility with IdeaVim 2.18.1
 
 ## 1.0.2 (Nov 20, 2024)
 

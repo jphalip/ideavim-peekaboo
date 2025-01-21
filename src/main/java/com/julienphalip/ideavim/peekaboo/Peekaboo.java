@@ -258,10 +258,8 @@ public class Peekaboo implements VimExtension {
 
         private String getRegisterText(Register register) {
             List<KeyStroke> text =
-                    register.getRawText() != null
-                            ? VimInjectorKt.getInjector()
-                                    .getParser()
-                                    .parseKeys(register.getRawText())
+                    register.getText() != null
+                            ? VimInjectorKt.getInjector().getParser().parseKeys(register.getText())
                             : register.getKeys();
             return EngineStringHelper.INSTANCE
                     .toPrintableCharacters(text)
